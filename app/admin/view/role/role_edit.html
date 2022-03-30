@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>角色</title>
+</head>
+<link rel="stylesheet" href="/static/theme/index.css">
+<script src="/static/js/axios.min.js"></script>
+<script src="/static/js/vue.min.js"></script>
+<script src="/static/js/elementui-index.js"></script>
+<link rel="stylesheet" href="/static/css/elementui-common.css">
+<body>
+<div id="app">
+    <el-form label-width="120px" ref="form" :rules="rules" :model="form">
+        <el-form-item label="角色名称" prop="role_name">
+            <el-input v-model="form.role_name"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述">
+            <el-input type="textarea" v-model="form.role_desc"></el-input>
+        </el-form-item>
+        <el-form-item label="权限" prop="auths">
+            <el-tree
+                    :data="menu"
+                    show-checkbox
+                    default-expand-all
+                    ref="tree"
+                    node-key="id"
+                    highlight-current
+                    :props="defaultProps">
+            </el-tree>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="onSubmit('form')">提交</el-button>
+        </el-form-item>
+    </el-form>
+</div>
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            const validateAuth = (rule, value, callback) => {
+                if (this.$refs.tree.getCheckedKeys().length) {
+                    callback();
+                }
+                callback(new Error('请选择权限'));
+            };
+            return {
+                loaded: false,
+                menu: [],
+                defaultProps: {
+                    children: 'children',
+                    label: 'label'
+                },
+                form: {
+                    id: '{$id}',
+                },
+                rules: {
+                    role_name: [{required: true, message: '请输入角色名称', trigger: 'blur'}],
+                    auths: [
+                        {validator: validateAuth, trigger: 'blur'}
+                    ],
+                },
+            }
+        },
+        methods: {
+            onSubmit(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        const root = this;
+                        this.form.menus = this.$refs.tree.getCheckedKeys().join(",")
+                        axios.post('/admin/role/edit', this.form).then(function (res) {
+                            if (res.data.status === "success") {
+                                root.$message({
+                                    message: "保存成功",
+                                    type: 'success'
+                                });
+                                setTimeout(function () {
+                                    parent.layer.closeAll()
+                                    parent.app.refresh()
+                                }, 1000)
+                            } else if (res.data.message != undefined) {
+                                root.$message.error(res.data.message);
+                            }
+                        });
+                    }
+                })
+            },
+            getRow: function () {
+                let id = this.form.id;
+                const root = this
+                if (id === 0) {
+                    return
+                }
+                axios.post('/admin/role/row', {id: id}).then(function (res) {
+                    if (res.data) {
+                        root.form = res.data
+                        root.loaded = true
+                    }
+                });
+            },
+            getOptions: function () {
+                const root = this
+                axios.post('/admin/menu/roleoption', {}).then(function (res) {
+                    if (res.data) {
+                        root.menu = res.data
+                    }
+                });
+            },
+        },
+        created: function () {
+            this.getRow()
+            this.getOptions()
+        },
+        updated: function () {
+            if (this.loaded) {
+                this.$refs.tree.setCheckedKeys(this.form.menus.split(","));
+                this.loaded = false
+            }
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+#app {
+    padding: 0 10px;
+}
+
+.tip {
+    display: inline-block;
+    color: gray;
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+.tip span {
+    line-height: 25px;
+    font-size: 14px;
+    color: #909399;
+}
+
+.label {
+    color: gray;
+    margin-left: 10px;
+}
+
+
+/*layui fieldset*/
+.layui-elem-field {
+    margin-bottom: 10px;
+    padding: 0;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.layui-field-title {
+    border-width: 1px 0 0;
+    border-color: #e6e6e6;
+}
+
+.layui-elem-field legend {
+    margin-left: 20px;
+    padding: 0 10px;
+    font-size: 20px;
+    font-weight: 300;
+}
+
+.page {
+    margin-top: 5px;
+}
