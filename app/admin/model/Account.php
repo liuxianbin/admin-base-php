@@ -90,4 +90,85 @@ class Account {
         return json($data);
     }
 
+    // 校验权限
+    function checkAuth($controller, $action, $rid = 0) {
+        $controller = strtolower($controller);
+        $action = strtolower($action);
+        if (Session::get('uname') == ADMIN) {
+            return TRUE;
+        }
+        // 平台超级管理员
+        if ($rid === 0) {
+            return TRUE;
+        }
+        $row = Db::query("select id,is_check,status from {$this->t_menu} where is_delete=0 and controller=? and action=? limit 1", [$controller, $action]);
+        if (empty($row)) {
+            return FALSE;
+        }
+        if (!$row[0]['is_check']) {
+            return TRUE;
+        }
+        if (!$row[0]['status']) {
+            return FALSE;
+        }
+        $row = Db::query("SELECT id FROM {$this->t_role} WHERE id = ? AND FIND_IN_SET(?, menus)", [$rid, $row[0]["id"]]);
+        if (empty($row)) {
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    // 获取菜单
+    public function getMenu() {
+        if (Session::get('uname') == ADMIN) {
+            $sql = "SELECT m.* FROM {$this->t_menu} m WHERE m.status = 1 AND m.is_display = 1 AND m.is_delete=0 ORDER BY m.level, m.sort_num DESC,m.id DESC";
+        } else {
+            $rid = Session::get("rid");
+            $sql = "
+				SELECT m.*
+				FROM {$this->t_role} r
+				JOIN {$this->t_menu} m ON FIND_IN_SET(m.id, r.menus)
+				WHERE r.id = $rid
+				AND r.status = 1
+				AND r.is_delete = 0
+				AND m.status = 1
+				AND m.is_display = 1
+				AND m.is_delete = 0
+				ORDER BY
+					m.level,
+					m.sort_num DESC,
+					m.id DESC
+			";
+        }
+        $list = Db::query($sql);
+        $_list = [];
+        foreach ($list as $key => $value) {
+            $id = $value['id'];
+            $fid = $value['fid'];
+            if ($value['level'] == 1) {
+                $_list[$id] = [
+                    "name" => $value['name'],
+                    "id" => $value['id'],
+                    "data" => []
+                ];
+            } else {
+                if (empty($value['controller'])) {
+                    $url = null;
+                } else {
+                    $action = empty($value['action']) ? 'index' : $value['action'];
+                    $url = '/' . $value['module'] . '/' . $value['controller'] . '/' . $action . $value['params'];
+                }
+                $value['url'] = $url;
+                $_list[$fid]['data'][] = $value;
+            }
+        }
+        $_list = array_values($_list);
+        return json([
+            "list" => $_list,
+            "init_url" => $_list[0]['data'][0]['url'],
+            "init_opt" => $_list[0]['data']
+        ]);
+    }
+
+
 }
