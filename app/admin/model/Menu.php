@@ -24,7 +24,7 @@ class Menu {
     // 角色权限选项
     // 有效 && 不校验
     public function roleOption() {
-        $list = Db::query("select id,name,fid,level from clue_menu where is_check=1 and status=1 and is_delete=0 order by level,id");
+        $list = Db::query("select id,name,fid,level from $this->table where is_check=1 and status=1 and is_delete=0 order by level,id");
         $_list = $this->_Build(0, $list);
         return json($_list);
     }
@@ -52,6 +52,38 @@ class Menu {
             }
         }
         return $_list;
+    }
+
+    // 一级菜单
+    public function getSuperMenu() {
+        $list = Db::query("select id,name from $this->table where fid=0 and level=1 and status=1 and is_delete=0 order by sort_num desc,id");
+        return json($list);
+    }
+
+    public function edit($input) {
+        $fid = $input["menu_fid"];
+        // 顶层菜单
+        if (!is_numeric($fid)) {
+            //新增
+        } else {
+            //查询id是否存在
+            //不存在则新增
+        }
+        // 二级菜单
+        $menu_id = $input['menu_id'];
+        $menu_name = $input['menu_name'];
+        if (empty($menu_id)) {
+            // 新增
+        }
+        // 查询变更二级菜单名称
+
+        // 控制器
+        $curr_controller = $input['curr_controller'];
+        // 方法
+        $curr_actions = $input['curr_actions'];
+        // 遍历
+        // 判断新增or更新
+        return json($input);
     }
 
 

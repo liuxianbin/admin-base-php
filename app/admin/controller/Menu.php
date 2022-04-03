@@ -60,4 +60,13 @@ class Menu extends Base {
         }
         return json($list);
     }
+
+    // 顶部菜单
+    function getSuperMenu() {
+        return $this->m->getSuperMenu();
+    }
+
+    function edit() {
+        return $this->m->edit(input("post."));
+    }
 }
