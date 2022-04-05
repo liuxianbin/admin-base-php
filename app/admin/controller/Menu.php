@@ -27,26 +27,31 @@ class Menu extends Base {
 
     public function getActions() {
         $controller = input("post.controller");
-        $name = 'app\admin\controller\\' . $controller;
-        $arr = get_class_methods(new $name());
-        foreach ($arr as $k => $v) {
-            if ($v == '__construct') {
-                unset($arr[$k]);
+        $data = $this->m->getActions($controller);
+        if (empty($data["actions"])) {
+            $name = 'app\admin\controller\\' . $controller;
+            $arr = get_class_methods(new $name());
+            foreach ($arr as $k => $v) {
+                if ($v == '__construct') {
+                    unset($arr[$k]);
+                }
             }
+            $_list = [];
+            foreach ($arr as $item) {
+                $_list[] = [
+                    "id" => 0,
+                    "module" => "admin",
+                    "controller" => $controller,
+                    "action" => $item,
+                    "display_type" => 1,
+                    "is_check" => 1,
+                    "status" => 1,
+                    "sort_num" => 1
+                ];
+            }
+            $data["actions"] = $_list;
         }
-        $_list = [];
-        foreach ($arr as $item) {
-            $_list[] = [
-                "module" => "admin",
-                "controller" => $controller,
-                "action" => $item,
-                "display_type" => 1,
-                "is_check" => 1,
-                "status" => 1,
-                "sort_num" => 1
-            ];
-        }
-        return json($_list);
+        return json($data);
     }
 
     function getControllers() {

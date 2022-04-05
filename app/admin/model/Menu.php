@@ -63,27 +63,65 @@ class Menu {
     public function edit($input) {
         $fid = $input["menu_fid"];
         // 顶层菜单
+        $fid_param = [
+            'name' => $fid,
+            'is_display' => 1,
+            'level' => 1,
+            'fid' => 0,
+            'module' => '--',
+            'controller' => '--',
+            'action' => '--',
+        ];
         if (!is_numeric($fid)) {
-            //新增
+            $fid = Db::table($this->table)->insertGetId($fid_param);
         } else {
-            //查询id是否存在
-            //不存在则新增
+            //查询fid是否存在
+            $row = Db::table($this->table)->where('id', $fid)->find();
+            if (empty($row)) {
+                $fid = Db::table($this->table)->insertGetId($fid_param);
+            }
         }
         // 二级菜单
         $menu_id = $input['menu_id'];
         $menu_name = $input['menu_name'];
         if (empty($menu_id)) {
-            // 新增
+            $param = $fid_param;
+            $param['level'] = 2;
+            $param['fid'] = $fid;
+            $param['name'] = $menu_name;
+            $param['controller'] = $input['curr_controller'];
+            $fid = Db::table($this->table)->insertGetId($param);
+        } else {
+            Db::table($this->table)->where('id', $menu_id)->update([
+                'name' => $menu_name
+            ]);
         }
-        // 查询变更二级菜单名称
-
-        // 控制器
-        $curr_controller = $input['curr_controller'];
-        // 方法
         $curr_actions = $input['curr_actions'];
-        // 遍历
-        // 判断新增or更新
-        return json($input);
+        foreach ($curr_actions as $item) {
+            if (empty($item["id"])) {
+                $item["level"] = 3;
+                $item["fid"] = $fid;
+                Db::table($this->table)->insert($item);
+            } else {
+                Db::table($this->table)->where('id', $item["id"])->update($item);
+            }
+        }
+        return ajax_result(true);
+    }
+
+    public function getActions($controller) {
+        $row = Db::table($this->table)->field("id as menu_id,name as menu_name,fid as menu_fid")->where("controller", $controller)->where("level", "2")->find();
+        if (empty($row)) {
+            $row = [
+                "menu_id" => '',
+                "menu_name" => '',
+                "menu_fid" => '',
+                "actions" => []
+            ];
+        } else {
+            $row["actions"] = Db::table($this->table)->where("fid", $row["menu_id"])->select()->toArray();
+        }
+        return $row;
     }
 
 

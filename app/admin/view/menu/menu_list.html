@@ -33,7 +33,7 @@
             <el-input placeholder="请输入菜单名称" v-model="form.menu_name"></el-input>
         </el-form-item>
         <el-form-item label="归属" prop="menu_fid">
-            <el-select placeholder="请选择" v-model="form.menu_fid"
+            <el-select placeholder="请选择一级菜单" v-model="form.menu_fid"
                        v-model="form.menu_fid"
                        filterable
                        allow-create>
@@ -79,7 +79,6 @@
                                  label="显示">
                     <template slot-scope="scope">
                         <el-switch :inactive-value=0 :active-value=1
-                                   @change="handleChange(scope.row)"
                                    v-model="scope.row.is_display">
                         </el-switch>
                     </template>
@@ -107,7 +106,6 @@
                                  label="校验">
                     <template slot-scope="scope">
                         <el-switch :inactive-value=0 :active-value=1
-                                   @change="handleChange(scope.row)"
                                    v-model="scope.row.is_check">
                         </el-switch>
                     </template>
@@ -123,7 +121,6 @@
                                  label="状态">
                     <template slot-scope="scope">
                         <el-switch :inactive-value=0 :active-value=1
-                                   @change="handleChange(scope.row)"
                                    v-model="scope.row.status">
                         </el-switch>
                     </template>
@@ -152,22 +149,13 @@
     var app = new Vue({
         el: "#app",
         data: {
-            options: [{
-                value: '11',
-                label: 'HTML'
-            }, {
-                value: '22',
-                label: 'CSS'
-            }, {
-                value: '33',
-                label: 'JavaScript'
-            }],
             controllers: [],
             super_menu: [],
             form: {
                 curr_controller: "",
                 curr_actions: [],
                 menu_name: '',
+                menu_id: '',
                 menu_fid: '',
             },
             rules: {
@@ -186,7 +174,10 @@
             loadActions: function (controller) {
                 const root = this;
                 axios.post('/admin/menu/getActions', {controller: controller}).then(function (res) {
-                    root.form.curr_actions = res.data
+                    root.form.curr_actions = res.data.actions
+                    root.form.menu_name = res.data.menu_name
+                    root.form.menu_id = res.data.menu_id
+                    root.form.menu_fid = res.data.menu_fid
                 });
             },
             loadSuperMenu: function () {
@@ -199,7 +190,7 @@
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         var root = this
-                        console.log(this.form)
+                        // console.log(this.form)
                         axios.post('/admin/menu/edit', this.form).then(function (res) {
                             if (res.data.status === "success") {
                                 root.$message({
