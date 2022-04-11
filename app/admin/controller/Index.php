@@ -38,7 +38,11 @@ class Index {
         return redirect('/admin/login');
     }
 
+    // MENU_MODE_DB： true从数据库查询  false从配置文件读取
     function getMenu() {
+        if (MENU_MODE_DB) {
+            return $this->a->getMenu();
+        }
         Config::load('extra/menu', "menu");
         $_list = Config::get("menu");
         return json([
@@ -48,6 +52,7 @@ class Index {
         ]);
     }
 
+    // 校验权限
     public function checkAuth() {
         return $this->a->checkAuth(input("post.controller"), input("post.action"), Session::get('rid'));
     }

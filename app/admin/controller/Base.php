@@ -24,16 +24,12 @@ class Base {
         $this->IsPOST = request()->method() == "POST";
     }
 
-    public function New() {
+    private function New() {
         return Db::table($this->table);
     }
 
     public function Row() {
         return json($this->New()->where("id", input("post.id"))->find());
-    }
-
-    protected function RowArray($where = []) {
-        return $this->New()->where($where)->find();
     }
 
     public function Delete() {

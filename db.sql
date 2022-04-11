@@ -54,3 +54,5 @@ CREATE TABLE `sys_menu`
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='菜单';
 
+alter table sys_role
+    add half_check_menus text NOT NULL comment '半选中' after menus;

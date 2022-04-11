@@ -14,7 +14,7 @@
         <ul class="layui-nav layui-layout-left">
             <li class="layui-nav-item" :class="level_1_sel_index == index?'layui-this':''"
                 v-for="(item,index) in menus">
-                <a href="javascript:;" @click="selMenu(index)">{{item.name}}</a>
+                <a href="javascript:;" @click="selMenu(index)">{{item.label}}</a>
             </li>
         </ul>
         <ul class="layui-nav layui-layout-right">
@@ -32,9 +32,18 @@
     <div class="layui-side layui-bg-black">
         <div class="layui-side-scroll">
             <ul class="layui-nav layui-nav-tree" lay-filter="test">
-                <li class="layui-nav-item" :class="level_2_sel_index == index?'layui-this':''"
-                    v-for="(item,index) in options"><a href="javascript:;" :data-url="item.url"
-                                                       @click="goView" :data-index="index">{{item.name}}</a>
+                <li class="layui-nav-item layui-nav-itemed" v-for="(item,index) in options">
+                    <a href="javascript:;">{{item.label}}</a>
+                    <dl class="layui-nav-child">
+                        <dd v-for="(item2,index2) in item.children"
+                            :class="level_2_sel_index == index && level_3_sel_index == index2?'layui-this':''"
+                        >
+                            <a href="javascript:;" :data-url="item2.url"
+                               @click="goView"
+                               :data-index="index" :data-index2="index2">{{item2.label}}
+                            </a>
+                        </dd>
+                    </dl>
                 </li>
             </ul>
         </div>
@@ -55,12 +64,14 @@
             options: [],
             level_1_sel_index: 0,
             level_2_sel_index: 0,
+            level_3_sel_index: 0,
         },
         methods: {
             layuiInit: function () {
-                var root = this
+                const root = this;
                 layui.use(['form', "element"], function () {
                     root.layer = layui.layer
+                    root.ele = layui.element
                 });
             },
             repwd: function () {
@@ -75,16 +86,20 @@
             },
             goView: function (e) {
                 this.level_2_sel_index = e.target.dataset.index
+                this.level_3_sel_index = e.target.dataset.index2
                 this.url = e.target.dataset.url
             },
             selMenu: function (i) {
                 this.level_1_sel_index = 0
                 this.level_2_sel_index = 0
-                let option = this.menus[i].data
+                this.level_3_sel_index = 0
+                let option = this.menus[i].children
                 this.level_1_sel_index = i
                 this.options = option
                 if (option.length) {
-                    this.url = option[0].url
+                    if (option[0].children) {
+                        this.url = option[0].children[0].url
+                    }
                 }
             },
             loadData: function () {
@@ -95,15 +110,19 @@
                         root.url = res.data.init_url
                         root.options = res.data.init_opt
                         root.level_2_sel_index = 0
+                        root.level_3_sel_index = 0
                     }
                 });
             }
         },
         created: function () {
-            this.layuiInit()
             this.loadData()
         },
         mounted: function () {
+            this.layuiInit()
+        },
+        updated: function () {
+            this.ele && this.ele.init()
         }
     });
 </script>

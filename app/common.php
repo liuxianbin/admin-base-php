@@ -52,3 +52,5 @@ defined("NOCHANGE") or define("NOCHANGE", "nochange");
 defined("PERPAGE") or define("PERPAGE", 15);
 defined("ADMIN") or define("ADMIN", "admin");
 defined("SESSION_UID") or define("SESSION_UID", "site_uid");
+// MENU_MODE_DB： true从数据库查询  false从配置文件读取
+defined("MENU_MODE_DB") or define("MENU_MODE_DB", true);

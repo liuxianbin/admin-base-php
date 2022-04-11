@@ -68,6 +68,7 @@
                     if (valid) {
                         const root = this;
                         this.form.menus = this.$refs.tree.getCheckedKeys().join(",")
+                        this.form.half_check_menus = this.$refs.tree.getHalfCheckedKeys().join(",")
                         axios.post('/admin/role/edit', this.form).then(function (res) {
                             if (res.data.status === "success") {
                                 root.$message({

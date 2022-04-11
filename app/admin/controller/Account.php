@@ -19,7 +19,7 @@ class Account extends Base {
 
     public function edit() {
         if (request()->method() == "POST") {
-            return $this->a->edit_account(input("post."));
+            return $this->a->editAccount(input("post."));
         }
         return view("account_edit", ["id" => intval(input("param.id"))]);
     }

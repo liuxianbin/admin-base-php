@@ -35,10 +35,10 @@ class Menu {
         $child = $this->_GetChild($fid, $list);
         foreach ($child as $k => $v) {
             $_list[] = [
-                "id" => $v["id"],
-                "label" => $v["name"],
-                "children" => $this->_Build($v["id"], $list)
-            ];
+                    "id" => $v["id"],
+                    "label" => $v["name"],
+                    "children" => $this->_Build($v["id"], $list)
+                ] + $v;
         }
         return $_list;
     }
@@ -47,7 +47,7 @@ class Menu {
         $_list = [];
         foreach ($list as $k => $v) {
             if ($v["fid"] == $fid) {
-                $_list[] = ["id" => $v["id"], "name" => $v["name"]];
+                $_list[] = ["id" => $v["id"], "name" => $v["name"]] + $v;
                 unset($list[$k]);
             }
         }

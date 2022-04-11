@@ -52,7 +52,7 @@ class Account {
         return ajax_result($res);
     }
 
-    public function edit_account($data) {
+    public function editAccount($data) {
         $raw_pwd = $data["pwd_raw"];
         $data = filterInvalidData($data, $this->table);
         $id = intval($data['id']);
@@ -127,12 +127,12 @@ class Account {
             $sql = "
 				SELECT m.*
 				FROM {$this->t_role} r
-				JOIN {$this->t_menu} m ON FIND_IN_SET(m.id, r.menus)
+				JOIN {$this->t_menu} m ON FIND_IN_SET(m.id, CONCAT_WS(IF(r.half_check_menus,',',''),r.half_check_menus,r.menus))
 				WHERE r.id = $rid
 				AND r.status = 1
 				AND r.is_delete = 0
 				AND m.status = 1
-				AND m.is_display = 1
+                AND m.is_display = 1
 				AND m.is_delete = 0
 				ORDER BY
 					m.level,
@@ -141,32 +141,29 @@ class Account {
 			";
         }
         $list = Db::query($sql);
-        $_list = [];
-        foreach ($list as $key => $value) {
-            $id = $value['id'];
-            $fid = $value['fid'];
-            if ($value['level'] == 1) {
-                $_list[$id] = [
-                    "name" => $value['name'],
-                    "id" => $value['id'],
-                    "data" => []
-                ];
-            } else {
-                if (empty($value['controller'])) {
-                    $url = null;
-                } else {
-                    $action = empty($value['action']) ? 'index' : $value['action'];
-                    $url = '/' . $value['module'] . '/' . $value['controller'] . '/' . $action . $value['params'];
-                }
-                $value['url'] = $url;
-                $_list[$fid]['data'][] = $value;
-            }
+        foreach ($list as $k => $v) {
+            if ($v['module'] == '--' or $v["action"] == '--') {
+                $list[$k]["url"] = "javascript:;";
+            } else
+                $list[$k]["url"] = '/' . $v['module'] . '/' . $v["controller"] . "/" . $v["action"];
         }
-        $_list = array_values($_list);
+        $m = new Menu();
+        // _Build无限分级
+        $_list = $m->_Build(0, $list);
+        if (empty($_list)) {
+            return json([
+                "list" => [],
+                // 默认打开页面
+                "init_url" => "javascript:;",
+                // 默认左侧菜单
+                "init_opt" => []
+            ]);
+        }
+        $init_child = $_list[0]['children'];
         return json([
             "list" => $_list,
-            "init_url" => $_list[0]['data'][0]['url'],
-            "init_opt" => $_list[0]['data']
+            "init_url" => empty($init_child) ? "javascript:;" : $init_child[0]["url"],
+            "init_opt" => $init_child
         ]);
     }
 
