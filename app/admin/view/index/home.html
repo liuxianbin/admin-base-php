@@ -14,7 +14,7 @@
         <ul class="layui-nav layui-layout-left">
             <li class="layui-nav-item" :class="level_1_sel_index == index?'layui-this':''"
                 v-for="(item,index) in menus">
-                <a href="javascript:;" @click="selMenu(index)">{{item.label}}</a>
+                <a href="javascript:;" v-if="item.children.length" @click="selMenu(index)">{{item.label}}</a>
             </li>
         </ul>
         <ul class="layui-nav layui-layout-right">
@@ -33,17 +33,19 @@
         <div class="layui-side-scroll">
             <ul class="layui-nav layui-nav-tree" lay-filter="test">
                 <li class="layui-nav-item layui-nav-itemed" v-for="(item,index) in options">
-                    <a href="javascript:;">{{item.label}}</a>
-                    <dl class="layui-nav-child">
-                        <dd v-for="(item2,index2) in item.children"
-                            :class="level_2_sel_index == index && level_3_sel_index == index2?'layui-this':''"
-                        >
-                            <a href="javascript:;" :data-url="item2.url"
-                               @click="goView"
-                               :data-index="index" :data-index2="index2">{{item2.label}}
-                            </a>
-                        </dd>
-                    </dl>
+                    <template v-if="item.children.length">
+                        <a href="javascript:;">{{item.label}}</a>
+                        <dl class="layui-nav-child">
+                            <dd v-for="(item2,index2) in item.children"
+                                :class="level_2_sel_index == index && level_3_sel_index == index2?'layui-this':''"
+                            >
+                                <a href="javascript:;" :data-url="item2.url"
+                                   @click="goView"
+                                   :data-index="index" :data-index2="index2">{{item2.label}}
+                                </a>
+                            </dd>
+                        </dl>
+                    </template>
                 </li>
             </ul>
         </div>
