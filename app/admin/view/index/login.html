@@ -55,7 +55,16 @@
                     }
                 })
             }
-        }
+        },
+        mounted: function () {
+            const root = this
+            document.onkeydown = function (e) {
+                let ev = document.all ? window.event : e
+                if (ev.keyCode === 13) {
+                    root.doSubmit("userForm")
+                }
+            }
+        },
     })
 </script>
 </body>
